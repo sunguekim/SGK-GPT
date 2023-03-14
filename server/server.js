@@ -37,6 +37,29 @@ const papagoTranslate = async (text, source, target) => {
   }
 };
 
+const chatGpt = async (message) => {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: message }],
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+};
+
 app.get("/", async (req, res) => {
   res.status(200).send({
     message: "API 테스트입니다!" + `${process.env.OPENAI_API_KEY}`,
@@ -55,13 +78,10 @@ app.post("/", async (req, res) => {
   try {
     const prompt = await papagoTranslate(req.body.prompt, "ko", "en");
     console.log(prompt);
-    const response = await openai.createCompletion({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "system", content: prompt }],
-    });
+    const response = await chatGpt(prompt);
 
     const botResponse = await papagoTranslate(
-      response.data.choices[0].text,
+      response.data.choices[0].message.content,
       "en",
       "ko"
     );
