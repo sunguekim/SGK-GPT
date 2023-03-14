@@ -46,7 +46,7 @@ const papagoTranslate = async (text, source, target) => {
 
 app.get("/", async (req, res) => {
   res.status(200).send({
-    message: "API 테스트입니다!",
+    message: "API 테스트입니다!" + `${process.env.OPENAI_API_KEY}`,
   });
 });
 
