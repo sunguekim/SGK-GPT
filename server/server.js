@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import axios from "axios";
 import * as dotenv from "dotenv";
 import cors from "cors";
@@ -22,8 +22,8 @@ const papagoTranslate = async (text, source, target) => {
   // 헤더 설정
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
-    "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET,
+    "X-Naver-Client-Id": "ekLSNfHHfYoFxebYNqf3",
+    "X-Naver-Client-Secret": "kTtyxxb1LY",
   };
 
   // 한영 설정
@@ -43,10 +43,18 @@ app.get("/", async (req, res) => {
   });
 });
 
+const testSample = papagoTranslate("안녕하세요?", "ko", "en");
+
+app.get("/test", async (req, res) => {
+  res.status(200).send({
+    message: `${json.st(testSample)}`,
+  });
+});
+
 app.post("/", async (req, res) => {
   try {
     const prompt = await papagoTranslate(req.body.prompt, "ko", "en");
-
+    console.log(prompt);
     const response = await openai.createCompletion({
       model: "gpt-3.5-turbo",
       messages: [{ role: "system", content: prompt }],
