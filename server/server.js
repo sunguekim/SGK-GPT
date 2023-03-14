@@ -65,14 +65,6 @@ app.get("/", async (req, res) => {
   });
 });
 
-const testSample = papagoTranslate("안녕하세요?", "ko", "en");
-
-app.get("/test", async (req, res) => {
-  res.status(200).send({
-    message: `${json.st(testSample)}`,
-  });
-});
-
 app.post("/", async (req, res) => {
   try {
     const prompt = await papagoTranslate(req.body.prompt, "ko", "en");
