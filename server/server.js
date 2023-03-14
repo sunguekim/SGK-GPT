@@ -52,7 +52,7 @@ const chatGpt = async (message) => {
         }),
       }
     );
-    return response.json();
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.error(error);
     throw new Error(error);
@@ -72,7 +72,7 @@ app.post("/", async (req, res) => {
     const response = await chatGpt(prompt);
 
     const botResponse = await papagoTranslate(
-      response.data.choices[0].message.content,
+      response,
       "en",
       "ko"
     );
