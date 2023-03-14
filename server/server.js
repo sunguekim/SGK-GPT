@@ -42,18 +42,17 @@ const chatGpt = async (message) => {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: message }],
-      },
-      {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: message }],
+        }),
       }
     );
-    console.log(response.data);
-    return response.data;
+    return response.json();
   } catch (error) {
     console.error(error);
     throw new Error(error);
