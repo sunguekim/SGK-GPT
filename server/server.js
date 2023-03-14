@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import { Configuration, OpenAIApi } from "openai";
@@ -16,32 +17,24 @@ app.use(cors());
 app.use(express.json());
 
 const papagoTranslate = async (text, source, target) => {
-  const apiUrl = "https://openapi.naver.com/v1/papago/n2mt";
-  const apiKey = process.env.NAVER_CLIENT_ID;
-  const apiSecret = process.env.NAVER_CLIENT_SECRET;
+  const url = "https://openapi.naver.com/v1/papago/n2mt";
 
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", apiUrl);
-  xhr.setRequestHeader(
-    "Content-Type",
-    "application/x-www-form-urlencoded; charset=UTF-8"
-  );
-  xhr.setRequestHeader("X-Naver-Client-Id", apiKey);
-  xhr.setRequestHeader("X-Naver-Client-Secret", apiSecret);
+  // 헤더 설정
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+    "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET,
+  };
 
-  return new Promise((resolve, reject) => {
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        const response = JSON.parse(xhr.responseText);
-        if (response.message) {
-          reject(response.message);
-        } else {
-          resolve(response.message.result.translatedText);
-        }
-      }
-    };
-    xhr.send(`source=${source}&target=${target}&text=${text}`);
-  });
+  // 한영 설정
+  const data = `source=${source}&target=${target}&text=${text}`;
+
+  try {
+    const response = await axios.post(url, data, { headers });
+    return response.data.message.result.translatedText;
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 app.get("/", async (req, res) => {
@@ -59,7 +52,11 @@ app.post("/", async (req, res) => {
       messages: [{ role: "system", content: prompt }],
     });
 
-    const botResponse = await papagoTranslate(response.data.choices[0].text,"en","ko");
+    const botResponse = await papagoTranslate(
+      response.data.choices[0].text,
+      "en",
+      "ko"
+    );
 
     res.status(200).send({
       bot: botResponse,
